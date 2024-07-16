@@ -63,10 +63,10 @@ public class Principal {
                 listarAutoresRegistrados();
                 break;
             case 4:
-                System.out.println("Funcionalidad aún no implementada");
+                listarAutoresVivosPorAnio();
                 break;
             case 5:
-                System.out.println("Funcionalidad aún no implementada");
+                listarLibrosPorIdioma();
                 break;
             default:
                 System.out.println("Opción no válida. Por favor, intente de nuevo.");
@@ -97,7 +97,6 @@ public class Principal {
                 // Guardar el primer libro en la base de datos
                 LibrosDTO libroAGuardar = libros.get(0);
                 libroServicio.guardarLibro(libroAGuardar);
-                System.out.println("El libro '" + libroAGuardar.titulo() + "' ha sido guardado en la base de datos.");
             } else {
                 System.out.println("No se encontraron libros con ese título.");
             }
@@ -135,4 +134,41 @@ public class Principal {
         }
     }
 
+    private void listarAutoresVivosPorAnio() {
+        System.out.print("Ingrese el año para buscar autores vivos: ");
+        try {
+            int anio = Integer.parseInt(scanner.nextLine().trim());
+            List<AutoresDTO> autoresVivos = libroServicio.listarAutoresVivosPorAnio(anio);
+            if (autoresVivos.isEmpty()) {
+                System.out.println("No se encontraron autores vivos en el año " + anio);
+            } else {
+                System.out.println("\n----- AUTORES VIVOS EN " + anio + " -----");
+                for (AutoresDTO autor : autoresVivos) {
+                    System.out.println("Nombre: " + autor.nombre());
+                    System.out.println("Año de nacimiento: " + autor.fechaNacimiento());
+                    System.out.println("Año de fallecimiento: " + (autor.fechaFallecimiento() != null ? autor.fechaFallecimiento() : "Aún vive"));
+                    System.out.println("-----------------------------");
+                }
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Por favor, ingrese un año válido.");
+        }
+    }
+
+    private void listarLibrosPorIdioma() {
+        System.out.print("Ingrese el código de idioma (ej. es, en, fr): ");
+        String idioma = scanner.nextLine().trim().toLowerCase();
+        List<LibrosDTO> libros = libroServicio.listarLibrosPorIdioma(idioma);
+        if (libros.isEmpty()) {
+            System.out.println("No se encontraron libros en el idioma especificado.");
+        } else {
+            System.out.println("\n----- LIBROS EN " + idioma.toUpperCase() + " -----");
+            for (LibrosDTO libro : libros) {
+                System.out.println("Título: " + libro.titulo());
+                System.out.println("Autor: " + libro.autor().nombre());
+                System.out.println("Número de descargas: " + libro.numeroDeDescargas());
+                System.out.println("-----------------------------");
+            }
+        }
+    }
 }

@@ -25,9 +25,18 @@ public class JsonParser {
             int descargas = bookNode.path("download_count").asInt();
 
             JsonNode authorsNode = bookNode.path("authors");
-            String nombreAutor = authorsNode.isEmpty() ? "Autor desconocido" : authorsNode.get(0).path("name").asText();
+            String nombreAutor = "Autor desconocido";
+            Integer anioNacimiento = null;
+            Integer anioFallecimiento = null;
 
-            AutoresDTO autor = new AutoresDTO(nombreAutor, null, null);
+            if (!authorsNode.isEmpty()) {
+                JsonNode authorNode = authorsNode.get(0);
+                nombreAutor = authorNode.path("name").asText();
+                anioNacimiento = authorNode.path("birth_year").isNull() ? null : authorNode.path("birth_year").asInt();
+                anioFallecimiento = authorNode.path("death_year").isNull() ? null : authorNode.path("death_year").asInt();
+            }
+
+            AutoresDTO autor = new AutoresDTO(nombreAutor, anioNacimiento, anioFallecimiento);
             libros.add(new LibrosDTO(titulo, autor, idioma, descargas));
         }
 

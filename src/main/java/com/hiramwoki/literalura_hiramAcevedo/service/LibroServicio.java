@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,13 +29,21 @@ public class LibroServicio {
     }
 
     public void guardarLibro(LibrosDTO libroDTO) {
-        Libro libro = new Libro(
-                libroDTO.titulo(),
-                libroDTO.autor().nombre(),
-                libroDTO.idioma(),
-                libroDTO.numeroDeDescargas()
-        );
-        libroRepository.save(libro);
+        Optional<Libro> libroExistente = libroRepository.findByTitulo(libroDTO.titulo());
+        if (libroExistente.isEmpty()) {
+            Libro libro = new Libro(
+                    libroDTO.titulo(),
+                    libroDTO.autor().nombre(),
+                    libroDTO.idioma(),
+                    libroDTO.numeroDeDescargas(),
+                    libroDTO.autor().fechaNacimiento(),
+                    libroDTO.autor().fechaFallecimiento()
+            );
+            libroRepository.save(libro);
+            System.out.println("El libro '" + libroDTO.titulo() + "' ha sido guardado en la base de datos.");
+        } else {
+            System.out.println("El libro '" + libroDTO.titulo() + "' ya existe en la base de datos.");
+        }
     }
 
     public List<LibrosDTO> listarLibrosRegistrados() {
@@ -54,6 +63,19 @@ public class LibroServicio {
     public List<AutoresDTO> listarAutoresRegistrados() {
         return libroRepository.findAllAuthors().stream()
                 .map(autor -> new AutoresDTO(autor, null, null))
+                .collect(Collectors.toList());
+    }
+
+    public List<LibrosDTO> listarLibrosPorIdioma(String idioma) {
+        return libroRepository.findByIdioma(idioma).stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<AutoresDTO> listarAutoresVivosPorAnio(int anio) {
+        return libroRepository.findAutoresVivosPorAnio(anio).stream()
+                .map(libro -> new AutoresDTO(libro.getAutor(), libro.getAnioNacimientoAutor(), libro.getAnioFallecimientoAutor()))
+                .distinct()
                 .collect(Collectors.toList());
     }
 
